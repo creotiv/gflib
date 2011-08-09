@@ -53,7 +53,6 @@ from gevent import core
 from gevent.hub import getcurrent
 from gevent.event import Event
 from gevent.pool import Pool
-import functools
 # internal ###########################
 from gflib.utils import wrap
 ###################################### 

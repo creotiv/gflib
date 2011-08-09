@@ -3,7 +3,7 @@ import os
 import sys
 import yaml
 # internal ###########################
-from gflib.utils import InitConfig
+from gflib.utils.config import InitConfig
 from gflib.server.daemon import Server
 ###################################### 
 

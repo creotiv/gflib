@@ -1,5 +1,5 @@
 from gflib.request import LocalStorage
-from gflib.utils import utf8
+from gflib.parsing import utf8
 
 class BaseProtocol(object):
     """Base Protocol Interface"""

@@ -1,6 +1,7 @@
 import gevent
 
-from gflib.utils import Observer,FiredEvent,Config
+from gflib.utils.observer import Observer,FiredEvent
+from gflib.utils.config import Config
 
 import sys
 import logging
@@ -71,3 +72,6 @@ class MainDaemon(object):
             self._shutdown()
         finally:
             e.cancel()
+            
+            
+            

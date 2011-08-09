@@ -4,3 +4,10 @@ Version: 0.1
 Tested on: gevent 0.13.x(with libevent)
 
 Some libs for fast building servers based on gevent library.
+
+Test run:
+
+>> chmod a+x runapp.sh
+>> ./runapp.sh start
+>> ps -A | grep gfserver
+>> ./runapp.sh stop

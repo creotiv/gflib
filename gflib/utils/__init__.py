@@ -6,10 +6,6 @@ import signal
 import os
 import re
 
-from config import *
-from loader import *
-from observer import *
-
 def load_yaml(path):
     try:
         stream = file(path, 'r')

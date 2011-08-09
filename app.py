@@ -1,6 +1,7 @@
 from gflib.server.app import BaseApplication
 from gflib.logging.logger import setupLogging
-from gflib.utils import Config,Observer
+from gflib.utils.config import Config
+from gflib.utils.observer import Observer
 
 from main import DaemonChild,MainDaemon
 
@@ -22,7 +23,8 @@ class Application(BaseApplication):
         setupLogging()
         # Main daemon process initializing here
         try:
-            MainDaemon()
+            d = MainDaemon()
+            d.run()
         except Exception,e:
             logging.exception('Error in main loop: %s' % e)
             self.shutdown_daemon()
@@ -35,7 +37,8 @@ class Application(BaseApplication):
         try:
             # Main daemon child processes initializing here. 
             # Pnum is process number in stack
-            DaemonChild()
+            d = DaemonChild()
+            d.run()
         except Exception,e:
             logging.exception('Error in main loop: %s' % e)
             self.shutdown_process()

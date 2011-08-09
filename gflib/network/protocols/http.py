@@ -1,6 +1,8 @@
 from gflib.logging.firepy import FirePy
 from gflib.network.protocols.base import BaseProtocol
-from gflib.utils import wrap,utf8,Config
+from gflib.utils import wrap
+from gflib.parsing import utf8
+from gflib.utils.config import Config
 from gflib.db.storage import LocalStorage
 
 from cgi import parse_multipart

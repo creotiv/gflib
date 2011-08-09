@@ -1,15 +1,18 @@
 import pymongo
 import gevent
 from gevent.queue import PriorityQueue
-from lib.logger import error,debug
-from lib.config import Config
-from lib.events import Events
 import sys
 import logging
 import os
 import time
 
-class MongoPoolCantConnect(Exception):
+class MongoPoolException(Exception):
+    pass
+
+class MongoPoolCantConnect(MongoPoolException):
+    pass
+    
+class MongoPoolAutoReconnect(MongoPoolException):
     pass
 
 class GPool(object):
@@ -58,7 +61,6 @@ class GPool(object):
 
 pymongo.connection._Pool = GPool
 
-
 class MongoConnection(object):
     """Memcache pool auto-destruct connection"""
     def __init__(self,pool,conn):
@@ -75,7 +77,6 @@ class MongoConnection(object):
         return self.conn[name]
                                              
     def __del__(self):
-        #self.conn.connection.end_request()
         self.pool.queue.put((time.time(),self.conn))
         del self.pool
         del self.conn
@@ -83,15 +84,15 @@ class MongoConnection(object):
 
 class Mongo(object):    
     """MongoDB Pool"""
-    def __new__(cls,size=5,*args,**kwargs):
+    def __new__(cls,size=5,dbname='',*args,**kwargs):
         if not hasattr(cls,'_instance'):
-            c = Config()
             cls._instance = object.__new__(cls)
+            cls._instance.dbname = dbname
             cls._instance.queue = PriorityQueue(size)
             for x in xrange(size):
                 try:
                     cls._instance.queue.put(
-                        (time.time(),pymongo.Connection(*args,**kwargs)[c.get('db.name','seotools')])
+                        (time.time(),pymongo.Connection(*args,**kwargs)[dbname])
                     )
                 except Exception,e:
                     raise MongoPoolCantConnect('Can\'t connect to mongo servers: %s' % e)
@@ -104,17 +105,15 @@ class Mongo(object):
         return obj(self,self.queue.get(block,timeout)[1]) 
         
 def autoreconnect(func,*args,**kwargs):
-    c = Config()
-    for i in xrange(c.get('db.query_tries',20)):
+    while True
         try:
             result = func(*args,**kwargs)
         except pymongo.errors.AutoReconnect:
-            sys.exc_clear()
-            gevent.sleep(1)
+            raise MongoPoolAutoReconnect('Can\'t connect to DB, it may gone.')      
         else: 
             return result
             break
 
-    raise MongoPoolCantConnect('Can\'t connect to DB, it may gone.')      
+        
     
         

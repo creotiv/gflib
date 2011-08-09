@@ -29,7 +29,7 @@ def _importAndCheckStack(importName):
         sys.modules.pop(importName, None)
         raise
 
-LoadModuleError(Exception):
+class LoadModuleError(Exception):
     pass
 
 def load_module(name):
