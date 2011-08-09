@@ -1,0 +1,35 @@
+# server name in linux console
+AppName: gfserver
+server:
+  # number of child processes
+  proc_num: 1
+  
+  pidfile: pids/sever.pid
+  uid: 0
+  gid: 0
+  umask: 022
+  chdir: ""
+  
+  debug: true
+
+logging:
+  # max files for logging. For example: log.txt, log1.txt, ... ,logN.txt.
+  max_files: 99999
+
+  # max log file length.
+  max_bytes: 10097152
+
+  # max memory cache length for log.
+  max_cache: 10097152
+
+  # python logging formatter
+  format: '%(asctime)s %(name)-12s %(levelname)-8s%(message)s'
+
+  # log files for different levels of logging.
+  error: logs/main-error
+  debug: logs/main-debug
+  log: logs/main-log
+  
+
+
+      
