@@ -1,8 +1,7 @@
+from gflib.logging.firepy import FirePy
 from gflib.network.protocols.base import BaseProtocol
-from gflib.escape import utf8
-from gflib.utils.firepy import FirePy
-from gflib.config import Config
-from gflib.request import RequestLocalStorage
+from gflib.utils import wrap,utf8,Config
+from gflib.db.storage import LocalStorage
 
 from cgi import parse_multipart
 from urlparse import parse_qs
@@ -59,7 +58,7 @@ class HTTPProtocol(BaseProtocol):
             request_data['r.c']       = c
             request_data['r.a']       = a
             
-            #rls = RequestLocalStorage.getInstance()
+            #rls = LocalStorage.getInstance()
             #rls.set('request.data',data)
             #rls.set('request.m',m)
             #rls.set('request.c',c)

@@ -1,7 +1,6 @@
 import gevent
 
-from gflib.observer import Observer,FiredEvent
-from gflib.config import Config
+from gflib.utils import Observer,FiredEvent,Config
 
 import sys
 import logging

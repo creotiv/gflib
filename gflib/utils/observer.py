@@ -55,7 +55,7 @@ from gevent.event import Event
 from gevent.pool import Pool
 import functools
 # internal ###########################
-from tools import wrap
+from gflib.utils import wrap
 ###################################### 
  
 class FiredEvent:

@@ -1,8 +1,6 @@
 from gflib.network.protocols.base import BaseProtocol
-from gflib.tools import wrap
-from gflib.escape import utf8
-from gflib.request import RequestLocalStorage
-from gflib.config import Config
+from gflib.utils import wrap,utf8,Config
+from gflib.db.storage import LocalStorage
 
 from pyamf.remoting.gateway.wsgi import WSGIGateway
 import pyamf.remoting.gateway
@@ -21,21 +19,21 @@ class AMFProtocol(BaseProtocol):
         self.gw = WSGIGateway({'CallMethod':self.run})
         
     def handler(self,env,response,request_data={}):
-        #rls = RequestLocalStorage.getInstance()
+        #rls = LocalStorage.getInstance()
         #rls.set('r',request_data)
         self.gw = WSGIGateway({'CallMethod':wrap(self.run,request_data=request_data)})
         return self.gw(env,response)
 
     def run(self,m,c,a,data,request_data={}):
         
-        #rls = RequestLocalStorage.getInstance()
+        #rls = LocalStorage.getInstance()
         #request_data                  = rls.get('r',{})
         request_data['r.data']        = data
         request_data['r.m']           = m
         request_data['r.c']           = c
         request_data['r.a']           = a
         
-        #rls = RequestLocalStorage.getInstance()
+        #rls = LocalStorage.getInstance()
         #rls.set('request.data',data)
         #rls.set('request.m',m)
         #rls.set('request.c',c)

@@ -1,5 +1,5 @@
-from gflib.request import RequestLocalStorage
-from gflib.escape import utf8
+from gflib.request import LocalStorage
+from gflib.utils import utf8
 
 class BaseProtocol(object):
     """Base Protocol Interface"""
@@ -18,7 +18,7 @@ class BaseProtocol(object):
         request_data['r.method']      = method
 
         # Initialize request local data
-        #rls = RequestLocalStorage.getInstance()
+        #rls = LocalStorage.getInstance()
         #rls.set('env',env)
         #rls.set('start_response',response)        
         #rls.set('request.client_ip',client_ip)

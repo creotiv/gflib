@@ -2,8 +2,8 @@ import logging
 import logging.handlers 
 import sys
 # internal ###########################
-from config import Config    
-from escape import utf8
+from gflib.utils import Config    
+from gflib.utils import utf8
 ######################################
 
 class NewLogger(object):

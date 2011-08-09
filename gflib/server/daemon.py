@@ -11,7 +11,7 @@ import gevent
 from optparse import OptionParser
 
 # internal ########################### 
-from gflib.tools import set_proc_name, get_somaxconn
+from gflib.utils import set_proc_name, get_somaxconn
 ###################################### 
 
 class Daemon(object):

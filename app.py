@@ -1,7 +1,6 @@
 from gflib.server.app import BaseApplication
-from gflib.logger import setupLogging
-from gflib.observer import Observer
-from gflib.config import Config
+from gflib.logging.logger import setupLogging
+from gflib.utils import Config,Observer
 
 from main import DaemonChild,MainDaemon
 
