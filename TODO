@@ -1,0 +1,38 @@
+1) Design reusable server protocol and routing system
+
+    API preview:
+
+    router   = JSONMCARouter(module='m',controller='c',action='c')
+    protocol = HTTPProtocol(router)
+    app      = Application(protocol)
+
+    server = WSGIServer(
+        ('127.0.0.1',8080), 
+        app
+    )
+    
+2) Change server API from BaseApplication class extanding to application hooks
+
+    Hooks preview:
+    
+    run.py --conf=conf.yaml --app=main.py
+    
+    # main.py
+    
+    set_hook('run_daemon',some_function1)
+    set_hook('run_daemon_child',some_function2)
+    set_hook('reload_daemon_config',some_function3)
+    
+    def some_function1(pnum):
+        print 'Daemon process runed'
+    
+    def some_function2(pnum):
+        print 'Child process runed'
+    
+    def some_function3(pnum):
+        print 'Daemon process config reload'
+
+3) Create Singleton factory and remove all singleton class implementations
+4) Create mixen of multiset and multiget function to use in any class what need it
+5) Add unit tests and integration tests. Check for memory leaks.
+
