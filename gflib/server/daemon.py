@@ -337,7 +337,7 @@ class Server(Daemon):
 
     def runDaemon(self, *args, **kwargs):
         """This method runs after daemon has daemonized himself and processes"""
-        self._app.run_daemon(*args, **kwargs)
+        self._app._run_daemon(*args, **kwargs)
 
     def runChild(self, pnum, *args, **kwargs):
         """This method runs after daemon has daemonized process as a child"""

@@ -3,6 +3,7 @@ import gevent
 from gflib.utils.observer import Observer,FiredEvent
 from gflib.utils.config import Config
 
+import time
 import sys
 import logging
 
@@ -29,6 +30,7 @@ class DaemonChild(object):
         e = self.events.wait('shutdown')
         try:
             while True:
+                logging.debug('child loop '+str(time.time()))
                 gevent.sleep(5)
         except KeyboardInterrupt:
             self._shutdown()
@@ -62,6 +64,7 @@ class MainDaemon(object):
         e = self.events.wait('shutdown')
         try:
             while True:
+                logging.debug('daemon loop '+str(time.time()))
                 gevent.sleep(5)
         except KeyboardInterrupt:
             self._shutdown()

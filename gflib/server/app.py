@@ -1,6 +1,7 @@
 import logging
 import os
 import sys
+import atexit
 import yaml
 # internal ###########################
 from gflib.utils.config import InitConfig
@@ -44,40 +45,41 @@ class BaseApplication(object):
         
     def _run_daemon(self, *args, **kwargs):
         """Executed on daemon init"""
-        Observer()
         self.run_daemon(*args, **kwargs)
  
     def _run_child(self, pnum, *args, **kwargs):
-        Observer()
-        atexit.register(self._exit_func)
         self.run_child(pnum, *args, **kwargs)
  
     def _stop_daemon(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
+        atexit.register(self._exit_func_daemon)
         server = Server.instance()
         server.stop()
         e = Observer()
         e.fire('shutdown')
-        self.shutdown_daemon()
 
     def _stop_child(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
+        atexit.register(self._exit_func_child)
         e = Observer()
         e.fire('shutdown')
-        self.shutdown_child()
-                
-    def _exit_func(self):
+        
+    def _exit_func_daemon(self):
         """Function called last in the shutdown queue of child process"""
-        conf = Config.getInstance()
-        pidfile = conf.get('server.pidfile','')
+        logging.shutdown()
+        self.shutdown_daemon() 
+                
+    def _exit_func_child(self):
+        """Function called last in the shutdown queue of child process"""
+        pidfile = self.pidfile
         pid_path = os.path.join(*pidfile.split('/')[0:-1])
         pidfile = os.path.join(pid_path,'chpid_'+str(os.getpid())+'.pid')
         if os.path.exists(pidfile):
             os.remove(pidfile)
         logging.shutdown()
-        self.shutdown_process()  
+        self.shutdown_child()  
         
     def _reload_config(self):
         try:

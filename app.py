@@ -6,11 +6,6 @@ from gflib.utils.observer import Observer
 from main import DaemonChild,MainDaemon
 
 import logging
-import atexit
-import os
-import sys
-import gevent
-import gc
 import yaml
 
 
@@ -21,7 +16,7 @@ class Application(BaseApplication):
     def run_daemon(self, *args, **kwargs):
         """Executed on daemon init"""
         setupLogging()
-        logging.debug('daemon '+str(Observer()))
+        logging.debug('DAEMON RUN')
         # Main daemon process initializing here
         try:
             d = MainDaemon()
@@ -30,10 +25,10 @@ class Application(BaseApplication):
             logging.exception('Error in main loop: %s' % e)
             self.stop_daemon()
 
-    def run_process(self, pnum, *args, **kwargs):
+    def run_child(self, pnum, *args, **kwargs):
         """Executed on each process init"""
         setupLogging(pnum)
-        logging.debug('proc '+str(Observer()))
+        logging.debug('CHILD RUN')
         try:
             # Main daemon child processes initializing here. 
             # Pnum is process number in stack
@@ -47,30 +42,30 @@ class Application(BaseApplication):
         """This methon should be rewrited in subclass. It's executed before 
         server startup. Used for initialize application data.
         """
-        pass
+        logging.debug('startup')
     
     def reload_daemon_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """      
-        pass
+        logging.debug('reload daemon')
     
-    def reload_config(self):
+    def reload_child_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """             
-        pass
+        logging.debug('reload child')
             
     
-    def shutdown_process(self):
+    def shutdown_child(self):
         """This method should be rewrited in subclass. It's executed after 
         server shutdown. Used for correct shutdown.
         """     
-        pass
+        logging.debug('kill child')
     
     def shutdown_daemon(self):
         """This method should be rewrited in subclass. It's executed after 
         server shutdown. Used for correct shutdown.
         """        
-        pass
+        logging.debug('kill daemon')
 
