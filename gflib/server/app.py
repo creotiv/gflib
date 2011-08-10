@@ -5,6 +5,7 @@ import yaml
 # internal ###########################
 from gflib.utils.config import InitConfig
 from gflib.server.daemon import Server
+from gflib.utils.observer import Observer
 ###################################### 
 
 class BaseApplication(object):
@@ -33,13 +34,95 @@ class BaseApplication(object):
         self.conf.set('pathes.base',os.path.dirname(os.path.abspath(sys.argv[0])))
         if root_path:
             self.conf.set('pathes.root',root_path)
+        self._startup()
+        
+    def _startup(self):
+        """It's executed before server startup. Used for initialize application 
+           data.
+        """
         self.startup()
+        
+    def _run_daemon(self, *args, **kwargs):
+        """Executed on daemon init"""
+        Observer()
+        self.run_daemon(*args, **kwargs)
+ 
+    def _run_child(self, pnum, *args, **kwargs):
+        Observer()
+        atexit.register(self._exit_func)
+        self.run_child(pnum, *args, **kwargs)
+ 
+    def _stop_daemon(self, sig=None, frame=None):
+        """It's executed when server shutdown. Used for correct shutdown.
+        """        
+        server = Server.instance()
+        server.stop()
+        e = Observer()
+        e.fire('shutdown')
+        self.shutdown_daemon()
+
+    def _stop_child(self, sig=None, frame=None):
+        """It's executed when server shutdown. Used for correct shutdown.
+        """        
+        e = Observer()
+        e.fire('shutdown')
+        self.shutdown_child()
+                
+    def _exit_func(self):
+        """Function called last in the shutdown queue of child process"""
+        conf = Config.getInstance()
+        pidfile = conf.get('server.pidfile','')
+        pid_path = os.path.join(*pidfile.split('/')[0:-1])
+        pidfile = os.path.join(pid_path,'chpid_'+str(os.getpid())+'.pid')
+        if os.path.exists(pidfile):
+            os.remove(pidfile)
+        logging.shutdown()
+        self.shutdown_process()  
+        
+    def _reload_config(self):
+        try:
+            stream = file(self.conf_path, 'r')
+            data = yaml.load(stream)
+            stream.close()
+        except yaml.YAMLError, exc:
+            if hasattr(exc, 'problem_mark'):
+                mark = exc.problem_mark
+                logging.error("Config error at position: (%s:%s)" % 
+                                                    (mark.line+1, mark.column+1)
+                )
+        else:
+            logging.debug('Configuration reloaded #%s' % os.getpid())
+            
+        o = Observer()
+        o.fire('reload_config')
+        
+    def _reload_child_config(self, sig=None, frame=None): 
+        """It's executed when server get SIGUSR1 signal. Used for configuration 
+           reload without daemon restart.
+        """      
+        self._reload_config()
+        self.reload_child_config()
+        
+    def _reload_daemon_config(self, sig=None, frame=None): 
+        """It's executed when server get SIGUSR1 signal. Used for configuration 
+           reload without daemon restart.
+        """      
+        self._reload_config()
+        server = Server.instance()
+        server.reload_child_configs()
+        self.reload_daemon_config()    
+ 
+    def stop_daemon(self):
+        self._stop_daemon()
+        
+    def stop_child(self):
+        self._stop_child()
  
     def run_daemon(self, *args, **kwargs):
         """Executed on daemon init"""
         pass
 
-    def run_process(self, pnum, *args, **kwargs):
+    def run_child(self, pnum, *args, **kwargs):
         """Executed on each process init"""
         pass
 
@@ -49,25 +132,8 @@ class BaseApplication(object):
         """
         pass
     
-    def _stop_daemon(self, sig=None, frame=None):
-        """It's executed when server shutdown. Used for correct shutdown.
-        """        
-        server = Server.instance()
-        server.stop()
-        self.shutdown_daemon()
-
-    def _stop_procces(self, sig=None, frame=None):
-        """It's executed when server shutdown. Used for correct shutdown.
-        """        
-        self.shutdown_process()  
-        
-    def _reload_config(self, sig=None, frame=None): 
-        """It's executed when server get SIGUSR1 signal. Used for configuration 
-           reload without daemon restart.
-        """      
-        self.reload_config()
-        
-    def reload_config(self):
+    
+    def reload_child_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """      
@@ -78,16 +144,8 @@ class BaseApplication(object):
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """      
         pass
-        
-    def _reload_daemon_config(self, sig=None, frame=None): 
-        """It's executed when server get SIGUSR1 signal. Used for configuration 
-           reload without daemon restart.
-        """      
-        server = Server.instance()
-        server.reload_child_configs()
-        self.reload_daemon_config()
 
-    def shutdown_process(self):
+    def shutdown_child(self):
         """This methon should be rewrited in subclass. It's executed after 
         server shutdown. Used for correct shutdown.
         """        

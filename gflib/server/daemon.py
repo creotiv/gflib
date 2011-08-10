@@ -96,7 +96,7 @@ class Daemon(object):
             for i in xrange(self.processes):
                 forked = gevent.fork()
                 if forked == 0:
-                    self.runProcess(i)
+                    self.runChild(i)
                     return
                 else:
                     file(pid_path+'chpid_'+str(forked)+'.pid','w+').write("%s\n" % forked)
@@ -105,13 +105,13 @@ class Daemon(object):
         else:
             forked = gevent.fork()
             if forked == 0:
-                self.runProcess(0)
+                self.runChild(0)
                 return
             else:           
                 file(pid_path+'chpid_'+str(forked)+'.pid','w+').write("%s\n" % forked)
                 self.children.append(forked)
                 sys.stdout.write("Created child # %s\n" % forked)
-        gevent.spawn(self.run)
+        gevent.spawn(self.runDaemon)
         # Run children running monitor
         self._monitor()
         
@@ -132,7 +132,7 @@ class Daemon(object):
             index = self.children.index(proc[0])
             forked = gevent.fork()
             if forked == 0:
-                self.runProcess(index)
+                self.runChild(index)
                 return
             else:
                 file(pid_path+'chpid_'+str(forked)+'.pid','w+').write("%s\n" % forked)
@@ -161,7 +161,7 @@ class Daemon(object):
         self.daemonize()
 
     def debug(self):
-        self.runProcess(0)
+        self.runChild(0)
 
     def stop(self):
         """
@@ -285,13 +285,13 @@ class Daemon(object):
         """
         pass
 
-    def run(self):
+    def runDaemon(self):
         """
         You should override this method when you subclass Daemon. It
         will be called after the daemon has been daemonized by start()
         or restart().
         """
-    def runProcess(self):
+    def runChild(self):
         """
         You should override this method when you subclass Daemon. It
         will be called after the process has been daemonized by start()
@@ -335,17 +335,17 @@ class Server(Daemon):
         
         set_proc_name('%sd' % self._app.name.lower())
 
-    def run(self, *args, **kwargs):
+    def runDaemon(self, *args, **kwargs):
         """This method runs after daemon has daemonized himself and processes"""
         self._app.run_daemon(*args, **kwargs)
 
-    def runProcess(self, pnum, *args, **kwargs):
+    def runChild(self, pnum, *args, **kwargs):
         """This method runs after daemon has daemonized process as a child"""
-        gevent.signal(signal.SIGTERM, self._app._stop_procces) 
-        gevent.signal(signal.SIGINT, self._app._stop_procces)  
-        gevent.signal(signal.SIGUSR1, self._app._reload_config)   
+        gevent.signal(signal.SIGTERM, self._app._stop_child) 
+        gevent.signal(signal.SIGINT, self._app._stop_child)  
+        gevent.signal(signal.SIGUSR1, self._app._reload_child_config)   
         
         set_proc_name('%s-ch' % self._app.name.lower())
 
-        self._app.run_process(pnum, *args, **kwargs)
+        self._app.run_child(pnum, *args, **kwargs)
 
