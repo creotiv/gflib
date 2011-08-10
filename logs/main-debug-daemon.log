@@ -1,6 +1,0 @@
-2011-08-10 20:24:55,590 root         DEBUG    /home/creotiv/Dropbox/MyProjects/Python/GFLIB/app.py:19		DAEMON RUN
-2011-08-10 20:24:55,590 root         DEBUG    /home/creotiv/Dropbox/MyProjects/Python/GFLIB/main.py:67		daemon loop 1312997095.59
-2011-08-10 20:24:55,692 root         DEBUG    /home/creotiv/Dropbox/MyProjects/Python/GFLIB/app.py:70		kill daemon
-2011-08-10 20:28:43,854 root         DEBUG    /home/creotiv/Dropbox/MyProjects/Python/GFLIB/app.py:19		DAEMON RUN
-2011-08-10 20:28:43,855 root         DEBUG    /home/creotiv/Dropbox/MyProjects/Python/GFLIB/main.py:67		daemon loop 1312997323.86
-2011-08-10 20:28:43,956 root         DEBUG    /home/creotiv/Dropbox/MyProjects/Python/GFLIB/app.py:70		kill daemon
