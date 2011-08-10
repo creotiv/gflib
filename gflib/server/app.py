@@ -43,21 +43,14 @@ class BaseApplication(object):
         """
         self.startup()
         
-    def _run_daemon(self, *args, **kwargs):
-        """Executed on daemon init"""
-        self.run_daemon(*args, **kwargs)
- 
     def _run_child(self, pnum, *args, **kwargs):
         self.run_child(pnum, *args, **kwargs)
  
     def _stop_daemon(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
-        atexit.register(self._exit_func_daemon)
         server = Server.instance()
         server.stop()
-        e = Observer()
-        e.fire('shutdown')
 
     def _stop_child(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
@@ -65,12 +58,7 @@ class BaseApplication(object):
         atexit.register(self._exit_func_child)
         e = Observer()
         e.fire('shutdown')
-        
-    def _exit_func_daemon(self):
-        """Function called last in the shutdown queue of child process"""
-        logging.shutdown()
-        self.shutdown_daemon() 
-                
+                       
     def _exit_func_child(self):
         """Function called last in the shutdown queue of child process"""
         pidfile = self.pidfile
@@ -112,17 +100,9 @@ class BaseApplication(object):
         self._reload_config()
         server = Server.instance()
         server.reload_child_configs()
-        self.reload_daemon_config()    
- 
-    def stop_daemon(self):
-        self._stop_daemon()
         
     def stop_child(self):
         self._stop_child()
- 
-    def run_daemon(self, *args, **kwargs):
-        """Executed on daemon init"""
-        pass
 
     def run_child(self, pnum, *args, **kwargs):
         """Executed on each process init"""
@@ -134,26 +114,13 @@ class BaseApplication(object):
         """
         pass
     
-    
     def reload_child_config(self):
-        """This methon should be rewrited in subclass. It's executed when server 
-           get SIGUSR1 signal. Used for configuration reload without daemon restart.
-        """      
-        pass
-    
-    def reload_daemon_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """      
         pass
 
     def shutdown_child(self):
-        """This methon should be rewrited in subclass. It's executed after 
-        server shutdown. Used for correct shutdown.
-        """        
-        pass
-
-    def shutdown_daemon(self):
         """This methon should be rewrited in subclass. It's executed after 
         server shutdown. Used for correct shutdown.
         """        
