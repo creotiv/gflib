@@ -69,7 +69,7 @@ class LocalDB(object):
     def get(self,name,default=None):
         """Multilevel get function.
         Code:        
-        Config().get('opt.opt_level2.key','default_value')
+        inst.get('opt.opt_level2.key','default_value')
         """
         if not name: 
             return default
@@ -86,7 +86,7 @@ class LocalDB(object):
     def set(self,name,value):
         """Multilevel set function
         Code:        
-        Config().set('opt.opt_level2.key','default_value')
+        inst.set('opt.opt_level2.key','default_value')
         """
         self.wlock.acquire()
         self.modified = True
@@ -102,7 +102,7 @@ class LocalDB(object):
     def delete(self,name,value):
         """Multilevel delete function
         Code:        
-        Config().delete('opt.opt_level2.key','default_value')
+        inst.delete('opt.opt_level2.key','default_value')
         """
         self.wlock.acquire()
         self.modified = True
@@ -119,7 +119,7 @@ class LocalDB(object):
     def getset(self,name,value):
         """Get cache, if not exists set it and return set value
         Code:        
-        Config().getset('opt.opt_level2.key','default_value')
+        inst.getset('opt.opt_level2.key','default_value')
         """
         g = self.get(name)
         if not g:
