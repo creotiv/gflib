@@ -42,7 +42,7 @@ if options.app:
 
     # Initializing the daemon
     DAEMON = Server(app, options.proc_num, uid=options.uid, gid=options.gid,
-                    umask=options.umask,chdir=options.dir)
+                    chdir=options.dir)
 
     cmd = options.action
       

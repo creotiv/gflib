@@ -30,8 +30,8 @@ class BaseApplication(object):
         """
         self.conf_path = conf_path or 'config.yaml'
         self.conf = InitConfig(path=self.conf_path)
-        self.name = self.conf.get('AppName',None) or name or "tor"
-        self.pidfile = self.conf.get('server.pidfile', 'tor.pid')
+        self.name = self.conf.get('AppName',None) or name or "GFDaemon"
+        self.pidsdir = self.conf.get('server.pidsdir', '').rstrip('/ ')
         self.logging = self.conf.get('logging',{"error":None,"log":None})
         self.conf.set('pathes.base',os.path.dirname(os.path.abspath(sys.argv[0])))
         if root_path:
@@ -45,33 +45,28 @@ class BaseApplication(object):
         self.startup()
         
     def _run_child(self, pnum, *args, **kwargs):
-        self.run_child(pnum, *args, **kwargs)
+        self.run(pnum, *args, **kwargs)
  
     def _stop_daemon(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
-        print 'stop daemon'
-        gevent.getcurrent()
-        server = Server.instance()
-        server.stop()
+        pass
 
     def _stop_child(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
-        gevent.getcurrent()
         atexit.register(self._exit_func_child)
         e = Observer()
         e.fire('shutdown')
                        
     def _exit_func_child(self):
         """Function called last in the shutdown queue of child process"""
-        pidfile = self.pidfile
-        pid_path = os.path.join(*pidfile.split('/')[0:-1])
-        pidfile = os.path.join(pid_path,'chpid_'+str(os.getpid())+'.pid')
+        logging.debug('stop child')
+        pidfile = self.pidsdir+'/gfchild_'+str(os.getpid())+'.pid'
         if os.path.exists(pidfile):
             os.remove(pidfile)
         logging.shutdown()
-        self.shutdown_child()  
+        self.shutdown()  
         
     def _reload_config(self):
         gevent.getcurrent()
@@ -96,20 +91,18 @@ class BaseApplication(object):
            reload without daemon restart.
         """      
         self._reload_config()
-        self.reload_child_config()
+        self.reload_config()
         
     def _reload_daemon_config(self, sig=None, frame=None): 
         """It's executed when server get SIGUSR1 signal. Used for configuration 
            reload without daemon restart.
         """      
         self._reload_config()
-        server = Server.instance()
-        server.reload_child_configs()
         
-    def stop_child(self):
+    def stop(self):
         self._stop_child()
 
-    def run_child(self, pnum, *args, **kwargs):
+    def run(self, pnum, *args, **kwargs):
         """Executed on each process init"""
         pass
 
@@ -119,13 +112,13 @@ class BaseApplication(object):
         """
         pass
     
-    def reload_child_config(self):
+    def reload_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """      
         pass
 
-    def shutdown_child(self):
+    def shutdown(self):
         """This methon should be rewrited in subclass. It's executed after 
         server shutdown. Used for correct shutdown.
         """        

@@ -43,7 +43,7 @@ def setupLogging(proc="daemon"):
 %(message)s')
 
     # create file handler which logs even debug messages
-    if conf.get('server.debug'):
+    if conf.get('server.debug') or proc=='daemon':
         debug = logging.handlers.RotatingFileHandler(\
             filename=conf.get("logging.debug",'gs-debug')+'-'+str(proc)+'.log',\
             mode="a",maxBytes=conf.get("logging.max_bytes",10097152),\

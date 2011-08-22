@@ -4,10 +4,9 @@ server:
   # number of child processes
   proc_num: 2
   
-  pidfile: pids/sever.pid
+  pidsdir: pids/
   uid: 0
   gid: 0
-  umask: 022
   chdir: ""
   
   debug: true
@@ -26,9 +25,9 @@ logging:
   format: '%(asctime)s %(name)-12s %(levelname)-8s%(message)s'
 
   # log files for different levels of logging.
-  error: logs/main-error
-  debug: logs/main-debug
-  log: logs/main-log
+  error: logs/error
+  debug: logs/debug
+  log: logs/log
   
 
 

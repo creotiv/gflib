@@ -14,8 +14,8 @@
 3) Create Singleton factory and remove all singleton class implementations
 4) Create mixen of multiset and multiget function to use in any class what need it
 5) Add unit tests and integration tests. Check for memory leaks.
-6) REFACTOR daemonizer
+6) REFACTORING
     - use /proc/proc_id to monitor processes exit
     - add logging and remove stderr and stdout
-    - 
+    - add posibilities to turn off logging
     

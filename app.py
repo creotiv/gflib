@@ -13,9 +13,8 @@ class Application(BaseApplication):
     """Application class. Used for defining application as a module block which
     passed to the server for executing."""
  
-    def run_child(self, pnum, *args, **kwargs):
+    def run(self, pnum):
         """Executed on each process init"""
-        setupLogging(pnum)
         logging.debug('CHILD RUN')
         try:
             # Main daemon child processes initializing here. 
@@ -24,7 +23,7 @@ class Application(BaseApplication):
             d.run()
         except Exception,e:
             logging.exception('Error in main loop: %s' % e)
-            self.stop_child()
+            self.stop()
 
     def startup(self):
         """This methon should be rewrited in subclass. It's executed before 
@@ -32,14 +31,14 @@ class Application(BaseApplication):
         """
         logging.debug('startup')
     
-    def reload_child_config(self):
+    def reload_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
            get SIGUSR1 signal. Used for configuration reload without daemon restart.
         """             
         logging.debug('reload child')
             
     
-    def shutdown_child(self):
+    def shutdown(self):
         """This method should be rewrited in subclass. It's executed after 
         server shutdown. Used for correct shutdown.
         """     
