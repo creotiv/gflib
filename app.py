@@ -3,7 +3,7 @@ from gflib.logging.logger import setupLogging
 from gflib.utils.config import Config
 from gflib.utils.observer import Observer
 
-from main import DaemonChild,MainDaemon
+from main import DaemonChild
 
 import logging
 import yaml

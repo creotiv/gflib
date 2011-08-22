@@ -1,8 +1,8 @@
 # server name in linux console
-AppName: gfserver
+AppName: aaagfserver
 server:
   # number of child processes
-  proc_num: 1
+  proc_num: 2
   
   pidfile: pids/sever.pid
   uid: 0

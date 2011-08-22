@@ -9,6 +9,7 @@ import logging
 import socket
 import gevent
 from optparse import OptionParser
+from gevent.event import Event
 
 # internal ########################### 
 from gflib.utils import set_proc_name, get_somaxconn
@@ -113,8 +114,7 @@ class Daemon(object):
                 sys.stdout.write("Created child # %s\n" % forked)
         # Run children running monitor
         self._monitor()
-        
-
+    
     def _monitor(self):
         pid_path = ''
         if '/' in self.pidfile:
@@ -206,7 +206,7 @@ class Daemon(object):
                     break
                 time.sleep(0.3)
                     
-        else:	         
+        else:	   
             self.stop_signal = True
             for i in self.children:
                 try:

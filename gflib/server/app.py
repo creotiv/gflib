@@ -3,6 +3,7 @@ import os
 import sys
 import atexit
 import yaml
+import gevent
 # internal ###########################
 from gflib.utils.config import InitConfig
 from gflib.server.daemon import Server
@@ -49,12 +50,15 @@ class BaseApplication(object):
     def _stop_daemon(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
+        print 'stop daemon'
+        gevent.getcurrent()
         server = Server.instance()
         server.stop()
 
     def _stop_child(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
+        gevent.getcurrent()
         atexit.register(self._exit_func_child)
         e = Observer()
         e.fire('shutdown')
@@ -70,6 +74,7 @@ class BaseApplication(object):
         self.shutdown_child()  
         
     def _reload_config(self):
+        gevent.getcurrent()
         try:
             stream = file(self.conf_path, 'r')
             data = yaml.load(stream)
