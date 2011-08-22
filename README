@@ -1,5 +1,5 @@
 Gevent Framework Library
-Version: 0.1
+Version: 0.0.1
 
 Tested on: gevent 0.13.x(with libevent)
 
