@@ -15,5 +15,5 @@
 4) Create mixen of multiset and multiget function to use in any class what need it
 5) Add unit tests and integration tests. Check for memory leaks.
 6) REFACTORING
-    - add posibilities to turn off logging
+    
     
