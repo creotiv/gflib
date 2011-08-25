@@ -1,4 +1,5 @@
 from gflib.parsing import utf8,json_encode
+from gflib.utils.loader import load_module
 
 from cgi import parse_multipart
 from urlparse import parse_qs
@@ -61,18 +62,32 @@ class HTTPDOTRouter(object):
         data.update(dict(POST))
     
         try:
-            path        = data.get(self.path,None)
+            path        = data.get(self.path,'')
             if not path:
                 response('400 Bad Request', self.default_headers )
                 return [json_encode({'error':400,'msg':'Bad Request.'})]
-                
-            params      = data
             
-            response('200 OK', self.default_headers )
-            return [json_encode(data)]
+            params      = data
+            path        = map(lambda s:s.capitalize(),path[0].split('.'))
+            path.insert(0,'modules')
+
+            try:
+                controller = load_module('.'.join(path[:-1]+[path[-2]+'Controller']))
+                controller = controller(env,response,data,self.default_headers)  
+                if not hasattr(controller,path[-1]+'Action'):
+                    raise Exception('No such action %s' % '.'.join(path[:-1]+
+                        [path[-2]+'Controller',path[-1]+'Action'])
+                    )
+            except Exception,err:
+                logging.error(err)
+                response('400 Bad Request', self.default_headers )
+                return [json_encode({'error':400,'msg':'Bad Request.'})]
+
+            return getattr(controller,path[-1]+'Action')()
+            
         except Exception,e:
-            response('500 Internal Server Error', self.default_headers )
             logging.exception(e)
+            response('500 Internal Server Error', self.default_headers )
             return [json_encode({'error':500,'msg':'Internal Server Error'})]      
             
               
