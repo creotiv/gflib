@@ -72,7 +72,7 @@ class HTTPDOTRouter(object):
             path.insert(0,'modules')
 
             try:
-                controller = load_module('.'.join(path[:-1]+[path[-2]+'Controller']))
+                controller = load_module('.'.join(path[:-1]+[path[-2]+'HTTPController']))
                 controller = controller(env,response,data,self.default_headers)  
                 if not hasattr(controller,path[-1]+'Action'):
                     raise Exception('No such action %s' % '.'.join(path[:-1]+
