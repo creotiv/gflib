@@ -3,6 +3,7 @@
     API preview:
 
     router   = JSONMCARouter(module='m',controller='c',action='c')
+    #router   = ZeroMQDistributedJSONMCARouter(servers=['192.168.0.2:1000','192.168.0.3:1000'],module='m',controller='c',action='c')
     protocol = HTTPProtocol(router)
     app      = Application(protocol)
 
