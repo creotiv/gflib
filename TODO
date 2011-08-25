@@ -18,3 +18,4 @@
 6) REFACTORING
     - Observer method subscribe must call calback function trough getcurrent() greenlet
 7) Make Observer.callback() to run in initiated greenlet.
+8) BUG: On STOP runner don't wait while all children dies
