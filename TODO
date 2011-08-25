@@ -17,4 +17,4 @@
 5) Add unit tests and integration tests. Check for memory leaks.
 6) REFACTORING
     - Observer method subscribe must call calback function trough getcurrent() greenlet
-    
+7) Make Observer.callback() to run in initiated greenlet.
