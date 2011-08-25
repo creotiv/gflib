@@ -1,6 +1,8 @@
 from pyamf.remoting.gateway.wsgi import WSGIGateway
 import pyamf.remoting.gateway
 
+from gflib.utils.loader import load_module
+
 import logging
 
 
@@ -26,7 +28,30 @@ class AMFDOTRouter(object):
         if not isinstance(request,dict):
             return '400'
             
-        path        = env.get(self.path,'')
-        params      = request.get(self.params,[[],{}])
-        
-        return [path,params]
+        path        = request.get(self.path,'')
+        params      = request.get(self.params,{})
+
+        try:
+            if not path:
+                return 400
+            
+            path        = map(lambda s:s.capitalize(),path.split('.'))
+            path.insert(0,'modules')
+            
+            try:
+                controller = load_module('.'.join(path[:-1]+[path[-2]+'AMFController']))
+                controller = controller(env,params)  
+                if not hasattr(controller,path[-1]+'Action'):
+                    raise Exception('No such action %s' % '.'.join(path[:-1]+
+                        [path[-2]+'Controller',path[-1]+'Action'])
+                    )
+            except Exception,err:
+                logging.error(err)
+                return 400
+
+            return getattr(controller,path[-1]+'Action')()
+            
+        except Exception,e:
+            logging.exception(e)
+            return 500  
+            
