@@ -1,5 +1,4 @@
 import gevent
-from gevent.event import Event
 from gevent.wsgi import WSGIServer
 
 from gflib.utils.observer import Observer,FiredEvent
@@ -52,8 +51,7 @@ class DaemonChild(object):
                      ,backlog=4096
                      ,log=None
             ))
-            rack = ServerRack(servers).start()
-            Event().wait() 
+            rack = ServerRack(servers).serve_forever()
         except KeyboardInterrupt:
             self._shutdown()
         except FiredEvent:

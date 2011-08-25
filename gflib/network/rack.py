@@ -1,7 +1,10 @@
+from gevent.event import Event
+
 class ServerRack(object):
 
     def __init__(self, servers):
         self.servers = servers
+        self.ev = Event()
 
     def start(self):
         started = []
@@ -13,6 +16,10 @@ class ServerRack(object):
         except:
             self.stop(started)
             raise
+        
+    def serve_forever(self):
+        self.start()
+        self.ev.wait() 
 
     def stop(self, servers=None):
         if servers is None:
@@ -26,4 +33,5 @@ class ServerRack(object):
                 else: # gevent <= 0.13
                     import traceback
                     traceback.print_exc()
+        self.ev.set()
 

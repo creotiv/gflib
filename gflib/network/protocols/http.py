@@ -21,6 +21,10 @@ class HTTPDOTRouter(object):
         self.path               = path
         self.default_headers    = default_headers
         
+    def getAction(self,path):
+        
+        return module,controller,action
+        
     def __call__(self,env,response):
         method       = utf8(env.get('REQUEST_METHOD','GET')) 
         get_string   = utf8(env.get('QUERY_STRING',''))
@@ -57,7 +61,6 @@ class HTTPDOTRouter(object):
         data.update(dict(POST))
     
         try:
-            logging.debug(data)
             path        = data.get(self.path,None)
             if not path:
                 response('400 Bad Request', self.default_headers )
