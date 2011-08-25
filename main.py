@@ -1,7 +1,11 @@
 import gevent
+from gevent.event import Event
+from gevent.wsgi import WSGIServer
 
 from gflib.utils.observer import Observer,FiredEvent
 from gflib.utils.config import Config
+from gflib.network.protocols import AMFProtocol,AMFDOTRouter,HTTPProtocol,HTTPDOTRouter
+from gflib.network.rack import ServerRack
 
 import time
 import sys
@@ -29,9 +33,27 @@ class DaemonChild(object):
     def _loop(self):
         e = self.events.wait('shutdown')
         try:
-            while True:
-                logging.debug('child loop '+str(time.time()))
-                gevent.sleep(5)
+            servers = []
+            # use higher backlog for more concurency
+            router   = AMFDOTRouter()
+            protocol = AMFProtocol(router)
+            servers.append(WSGIServer(
+                     ('127.0.0.1',9001), 
+                     protocol
+                     ,backlog=4096
+                     ,log=None
+            ))
+            
+            router   = HTTPDOTRouter()
+            protocol = HTTPProtocol(router)
+            servers.append(WSGIServer(
+                     ('127.0.0.1',9002), 
+                     protocol
+                     ,backlog=4096
+                     ,log=None
+            ))
+            rack = ServerRack(servers).start()
+            Event().wait() 
         except KeyboardInterrupt:
             self._shutdown()
         except FiredEvent:
