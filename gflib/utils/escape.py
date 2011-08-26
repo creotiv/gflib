@@ -2,6 +2,9 @@
 
 """Escaping/unescaping methods for HTML, JSON, URLs, and others."""
 
+__all__ = ['html_unescape','xhtml_escape','xhtml_unescape','json_encode',
+           'json_decode','squeeze','url_escape','url_unescape','utf8']
+
 import htmlentitydefs
 import xml.sax.saxutils
 import urllib

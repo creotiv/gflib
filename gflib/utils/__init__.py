@@ -6,6 +6,8 @@ import signal
 import os
 import re
 
+from escape import *
+
 def load_yaml(path):
     try:
         stream = file(path, 'r')

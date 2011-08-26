@@ -22,10 +22,7 @@ class Config(dict):
         self.update(data)
 
     def get(self,name,default=None):
-        """Multilevel get function.
-        Code:        
-        Config().get('opt.opt_level2.key','default_value')
-        """
+        """Multilevel get function."""
         if not name: 
             return default
         levels = name.split('.')

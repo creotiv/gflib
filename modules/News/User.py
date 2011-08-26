@@ -1,4 +1,4 @@
-from gflib.parsing import json_encode
+from gflib.utils import json_encode
 
 class UserHTTPController(object):
 

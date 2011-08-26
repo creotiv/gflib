@@ -3,7 +3,7 @@ import logging.handlers
 import sys
 # internal ###########################
 from gflib.utils.config import Config    
-from gflib.parsing import utf8
+from gflib.utils import utf8
 ######################################
 
 class NewLogger(object):

@@ -1,5 +1,5 @@
-import memcache
 from gevent.queue import Queue
+import memcache
 import sys
 import logging
 
@@ -43,7 +43,6 @@ class MemcachePool(object):
             cls._instance       = object.__new__(cls)
             cls._instance.queue = Queue(size)
             cls._instance.temp  = temp
-            c = Config()
             if not temp:
                 for x in xrange(size):
                     try:

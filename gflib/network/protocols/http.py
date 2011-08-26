@@ -1,4 +1,4 @@
-from gflib.parsing import utf8,json_encode
+from gflib.utils import utf8,json_encode
 from gflib.utils.loader import load_module
 
 from cgi import parse_multipart

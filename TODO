@@ -1,21 +1,6 @@
-1) Design reusable server protocol and routing system
-
-    API preview:
-
-    router   = JSONMCARouter(module='m',controller='c',action='c')
-    #router   = ZeroMQDistributedJSONMCARouter(servers=['192.168.0.2:1000','192.168.0.3:1000'],module='m',controller='c',action='c')
-    protocol = HTTPProtocol(router)
-    app      = Application(protocol)
-
-    server = WSGIServer(
-        ('127.0.0.1',8080), 
-        app
-    )
-    
-3) Create Singleton factory and remove all singleton class implementations
-4) Create mixen of multiset and multiget function to use in any class what need it
+1) Create ZeroMQ Network distribution interface
+2) Create Distributed router DistributedHTTPDotRouter(servers=['192.168.0.2:1000','192.168.0.3:1000'])
 5) Add unit tests and integration tests. Check for memory leaks.
-6) REFACTORING
-    - Observer method subscribe must call calback function trough getcurrent() greenlet
 7) Make Observer.callback() to run in initiated greenlet.
 8) BUG: On STOP runner don't wait while all children dies
+9) BUG: ChildPid doesn't killing on exit
