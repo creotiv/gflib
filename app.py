@@ -15,7 +15,6 @@ class Application(BaseApplication):
  
     def run(self, pnum):
         """Executed on each process init"""
-        logging.debug('CHILD RUN')
         try:
             # Main daemon child processes initializing here. 
             # Pnum is process number in stack

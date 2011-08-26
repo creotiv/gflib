@@ -7,7 +7,7 @@ from gflib.network.protocols import AMFProtocol,AMFDOTRouter,HTTPProtocol,HTTPDO
 from gflib.network.rack import ServerRack
 
 import time
-import os
+import os,sys
 import logging
 
     
@@ -27,9 +27,7 @@ class DaemonChild(object):
        
     def _shutdown(self):
         logging.debug('Shuting down the daemon child.')
-        # Child process must use only os._exit(0) 
-        # for preventing return to the parent process
-        os._exit(0)
+        sys.exit(0)
 
     def _loop(self):
         e = self.events.wait('shutdown')

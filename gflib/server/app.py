@@ -10,6 +10,7 @@ from gflib.server.daemon import Server
 from gflib.utils.observer import Observer
 ###################################### 
 
+
 class BaseApplication(object):
     """Application class. Used for defining application as a module block which
     passed to the server for executing."""
@@ -55,6 +56,7 @@ class BaseApplication(object):
     def _stop_child(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
         """        
+        logging.debug('fire exit')
         atexit.register(self._exit_func_child)
         e = Observer()
         e.fire('shutdown')

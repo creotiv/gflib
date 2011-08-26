@@ -3,4 +3,3 @@
 5) Add unit tests and integration tests. Check for memory leaks.
 7) Make Observer.callback() to run in initiated greenlet.
 8) BUG: On STOP runner don't wait while all children dies
-9) BUG: ChildPid doesn't killing on exit
