@@ -216,6 +216,9 @@ class Daemon(object):
             logging.shutdown()
             sys.exit(1)
 
+    def reload_config(self):
+        self.reload_child_configs()
+
     def reload_child_configs(self):
 
         if self.chdir:        
