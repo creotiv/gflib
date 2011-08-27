@@ -18,7 +18,7 @@ class Application(BaseApplication):
         try:
             # Main daemon child processes initializing here. 
             # Pnum is process number in stack
-            d = DaemonChild()
+            d = DaemonChild(pnum)
             d.run()
         except Exception,e:
             logging.exception('Error in main loop: %s' % e)

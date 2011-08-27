@@ -2,7 +2,7 @@
 AppName: aaagfserver
 server:
   # number of child processes
-  proc_num: 1
+  proc_num: 20
   
   pidsdir: pids/
   uid: 0
