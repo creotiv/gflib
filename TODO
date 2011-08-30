@@ -1,5 +1,5 @@
-1) Create ZeroMQ Network distribution interface
-2) Create Distributed router DistributedHTTPDotRouter(servers=['192.168.0.2:1000','192.168.0.3:1000'])
+4) Make server get config only from cli. YAML file should be parsed only in application 
 5) Add unit tests and integration tests. Check for memory leaks.
 7) Make Observer.callback() to run in initiated greenlet.
 8) BUG: On STOP runner don't wait while all children dies
+9) Refactor ZeroMQ distribution library for hiload task processing
