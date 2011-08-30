@@ -1,4 +1,3 @@
-4) Make server get config only from cli. YAML file should be parsed only in application 
 5) Add unit tests and integration tests. Check for memory leaks.
 7) Make Observer.callback() to run in initiated greenlet.
 8) BUG: On STOP runner don't wait while all children dies

@@ -1,12 +1,15 @@
 import logging
 import logging.handlers 
 import sys
+import os
 # internal ###########################
 from gflib.utils.config import Config    
 from gflib.utils import utf8
 ######################################
 
 class NewLogger(object):
+    
+    isdebug    = False
     
     @classmethod
     def error(cls,msg,*args,**kwargs):
@@ -26,10 +29,14 @@ class NewLogger(object):
     
     
     
-def setupLogging(proc="daemon"):
+def setupLogging(proc="daemon",debug=False,directory='logs/',count=10,
+                                                        max_size=10097152):
     """This function setup logging option for server"""
-    # getting the config
-    conf = Config()
+    directory = directory.rstrip(' /')
+    try: 
+        os.mkdir(directory)
+    except OSError:
+        pass
     # create logger
     logger = logging.getLogger()
     
@@ -43,11 +50,11 @@ def setupLogging(proc="daemon"):
 %(message)s')
 
     # create file handler which logs even debug messages
-    if conf.get('server.debug') or proc=='daemon':
+    if debug or proc=='daemon':
+        NewLogger.isdebug = True
         debug = logging.handlers.RotatingFileHandler(\
-            filename=conf.get("logging.debug",'gs-debug')+'-'+str(proc)+'.log',\
-            mode="a",maxBytes=conf.get("logging.max_bytes",10097152),\
-            backupCount=conf.get("logging.max_files",10))
+            filename=directory+'/gs-'+str(proc)+'-debug.log',\
+            mode="a",maxBytes=max_size,backupCount=count)
 
         debug.setLevel(0)
         debug.setFormatter(formatter) 
@@ -55,24 +62,21 @@ def setupLogging(proc="daemon"):
 
     # create console handler with a higher log level
     error = logging.handlers.RotatingFileHandler(\
-        filename=conf.get("logging.error",'gs-error')+'-'+str(proc)+'.log',\
-        mode="a",maxBytes=conf.get("logging.max_bytes",10097152),\
-        backupCount=conf.get("logging.max_files",10))
+        filename=directory+'/gs-'+str(proc)+'-error.log',\
+        mode="a",maxBytes=max_size,backupCount=count)
     error.setLevel(logging.ERROR)
     error.setFormatter(formatter)
     
     # buffer debug messages so they can be sent with error emails
-    error_cache = logging.handlers.MemoryHandler(conf.get("logging.max_cache",10097152), logging.ERROR, error)
+    error_cache = logging.handlers.MemoryHandler(max_size, logging.ERROR, error)
     error_cache.setLevel(logging.ERROR)    
 
     # add the handlers to the logger
-    if conf.get('server.debug'):
+    if debug:
         logger.addHandler(error)
     else:
         logger.addHandler(error_cache)
     
-    # TODO: not working properly
-    # monkey patch logging methods   
     logging.log         = logging_debug
     logging.debug       = logging_debug
     logging.error       = logging_error
@@ -81,68 +85,36 @@ def setupLogging(proc="daemon"):
   
 def logging_debug(msg, *args, **kwargs):
 
-    record = ' '.join([str(msg)]+map(str, args))
+    if not NewLogger.isdebug:
+        return
 
-    conf = Config()
+    record = ' '.join([str(msg)]+map(str, args))
 
     caller_file_name = sys._getframe().f_back.f_code.co_filename
     caller_file_line = sys._getframe().f_back.f_lineno
-
-
-    check = 'server' in conf
-
-    if (check and conf['server']['debug']) or True:
-        logger = logging
-        logging.basicConfig(level=logging.DEBUG)
-        format = conf.get('logging.format','%(asctime)s %(name)-12s \
-%(levelname)-8s%(message)s')
-        formatter = logging.Formatter(format)
-
-        mess = ''.join([' %s:%s\t\t' % (caller_file_name,caller_file_line),record])
-        NewLogger.debug(utf8(unicode(mess)))
+    
+    mess = ''.join([' %s:%s\t\t' % (caller_file_name,caller_file_line),record])
+    NewLogger.debug(utf8(unicode(mess)))
         
  
 def logging_error(msg, *args, **kwargs):
 
     record = ' '.join([str(msg)]+map(str, args))
 
-    conf = Config()
-
     caller_file_name = sys._getframe().f_back.f_code.co_filename
     caller_file_line = sys._getframe().f_back.f_lineno
 
-
-    if not 'server' in conf:
-        logger = logging
-        logging.basicConfig(level=logging.DEBUG)
-        format = conf.get('logging.format','%(asctime)s %(name)-12s \
-%(levelname)-8s%(message)s')
-        formatter = logging.Formatter(format)
-    else:
-        logger = logging.getLogger(conf['AppName'])
-
-
     mess = ''.join([' %s:%s\t\t' % (caller_file_name,caller_file_line),record])
     NewLogger.error(utf8(unicode(mess)))
+    
  
 def logging_exception(msg, *args, **kwargs):
     
     record = ' '.join([str(msg)]+map(str, args))
 
-    conf = Config()
-
     caller_file_name = sys._getframe().f_back.f_code.co_filename
     caller_file_line = sys._getframe().f_back.f_lineno
     
-    if not 'server' in conf:
-        logger = logging
-        logging.basicConfig(level=logging.DEBUG)
-        format = conf.get('logging.format','%(asctime)s %(name)-12s \
-%(levelname)-8s%(message)s')
-        formatter = logging.Formatter(format)
-    else:
-        logger = logging.getLogger(conf['AppName'])
-
     mess = ''.join([' %s:%s\t\t' % (caller_file_name,caller_file_line),record])
     NewLogger.exception(utf8(unicode(mess)))
 

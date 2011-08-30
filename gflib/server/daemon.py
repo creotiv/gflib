@@ -20,15 +20,20 @@ else:
 
 class Daemon(object):
 
-    def __init__(self,pidsdir="",processes=1,chdir=None,gid=None,uid=None):
-        self.pidsdir        = pidsdir.rstrip('/ ')
-        self.chdir          = chdir
-        self.uid            = uid
-        self.gid            = gid
-        self.children       = []
-        self.stop_signal    = False
-        self.processes      = processes
-        self.pid            = 0
+    def __init__(self,options=None):
+
+        self.uid         = options.get('uid',None)
+        self.gid         = options.get('gid',None)
+        self.chdir       = options.get('chdir',None)
+        self.processes   = options.get('proc_num',None) or 1
+        self.pidsdir     = options.get('pidsdir',None).rstrip('/ ') or 'pids'
+        self.debug       = options.get('chdir',None)
+        self.logs_dir    = options.get('logdir',None)
+        self.logs_count  = options.get('logfiles',None)
+        self.logs_size   = options.get('logsize',None)
+        self.children    = []
+        self.stop_signal = False
+        self.pid         = 0
         self._init_logging()
        
     def _daemonize(self):
@@ -65,7 +70,8 @@ class Daemon(object):
         file(self.pidsdir+'/gfdaemon.pid','w+').write(str(self.pid))
     
     def _init_logging(self):
-        setupLogging()
+        setupLogging(debug=self.debug,directory=self.logs_dir,count=self.logs_count,
+                                                        max_size=self.logs_size)
     
     def _init_signals(self):
         signal.signal(signal.SIGTERM, self._SIGTERM) 
@@ -95,7 +101,8 @@ class Daemon(object):
             forked = gevent.fork()
             if forked == 0:
                 #logging.shutdown()
-                setupLogging(i)
+                setupLogging(i,debug=self.debug,directory=self.logs_dir,
+                                count=self.logs_count,max_size=self.logs_size)
                 self.runChild(i)
                 return
             else:
@@ -124,7 +131,8 @@ class Daemon(object):
             
             if forked == 0:
                 #logging.shutdown()
-                setupLogging(index)
+                setupLogging(index,debug=self.debug,directory=self.logs_dir,
+                                count=self.logs_count,max_size=self.logs_size)
                 self.runChild(index)
                 return
             else:
@@ -287,20 +295,14 @@ class Server(Daemon):
             cls._instance = cls()
         return cls._instance
 
-    def __init__(self, app, proc_num=1, chdir=None, gid=None, uid=None):
+    def __init__(self, app, options=None):
         socket.SOMAXCONN = get_somaxconn()
-        self._app = app   
         sys.path.append(os.path.abspath(sys.argv[0]))
-        stdout = app.logging['log']+'.log'
-        stderr = app.logging['error']+'.log'
-        uid = app.conf.get('server.uid',None) or uid
-        gid = app.conf.get('server.gid',None) or gid
-        chdir = app.conf.get('server.chdir',None) or chdir
-        proc_num = app.conf.get('server.proc_num',None) or proc_num
-        pidsdir = app.pidsdir
-        super(Server,self).__init__(pidsdir=pidsdir,processes=proc_num,
-            chdir=chdir,gid=gid,uid=uid
-        )
+            
+        self.options        = app.options
+        self._app           = app   
+        logging.debug(app.conf)
+        super(Server,self).__init__(self.options)
     
     def _SIGTERM(self,sig=None,frame=None):
         self._app._stop_daemon()
