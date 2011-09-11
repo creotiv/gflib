@@ -1,8 +1,5 @@
 import pymongo
-import gevent
 from gevent.queue import PriorityQueue
-import sys
-import logging
 import os
 import time
 
