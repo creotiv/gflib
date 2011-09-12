@@ -22,12 +22,13 @@ class DaemonChild(object):
         
     def run(self):
         logging.debug(self.proc_num)
-        if self.proc_num == 0:    
+        self._main_loop()
+        """if self.proc_num == 0:    
             self._main_loop()
         elif self.proc_num == 1:
             self._broker_loop()
         elif self.proc_num > 1:
-            self._worker_loop()
+            self._worker_loop()"""
         
         
     @classmethod
@@ -36,42 +37,50 @@ class DaemonChild(object):
        
     def _shutdown(self):
         logging.debug('Shuting down the daemon child.')
-        sys.exit(0)
+        logging.shutdown()
+        # Use only for child processes after fork
+        os._exit(0)
         
     def _broker_loop(self):
-        context = zmq.Context()
-        frontend = context.socket(zmq.XREP)
-        backend = context.socket(zmq.XREQ)
-        frontend.bind("tcp://*:5559")
-        backend.bind("tcp://*:5560")
+        self.events.subscribe('shutdown',self._shutdown)
+        try:
+            context = zmq.Context()
+            frontend = context.socket(zmq.XREP)
+            backend = context.socket(zmq.XREQ)
+            frontend.bind("tcp://*:5559")
+            backend.bind("tcp://*:5560")
 
-        # Initialize poll set
-        poller = zmq.Poller()
-        poller.register(frontend, zmq.POLLIN)
-        poller.register(backend, zmq.POLLIN)
+            # Initialize poll set
+            poller = zmq.Poller()
+            poller.register(frontend, zmq.POLLIN)
+            poller.register(backend, zmq.POLLIN)
 
-        # Switch messages between sockets
-        while True:
-            socks = dict(poller.poll())
+            # Switch messages between sockets
+            while True:
+                socks = dict(poller.poll())
 
-            if socks.get(frontend) == zmq.POLLIN:
-                message = frontend.recv()
-                more = frontend.getsockopt(zmq.RCVMORE)
-                if more:
-                    backend.send(message, zmq.SNDMORE)
-                else:
-                    backend.send(message)
+                if socks.get(frontend) == zmq.POLLIN:
+                    message = frontend.recv()
+                    more = frontend.getsockopt(zmq.RCVMORE)
+                    if more:
+                        backend.send(message, zmq.SNDMORE)
+                    else:
+                        backend.send(message)
 
-            if socks.get(backend) == zmq.POLLIN:
-                message = backend.recv()
-                more = backend.getsockopt(zmq.RCVMORE)
-                if more:
-                    frontend.send(message, zmq.SNDMORE)
-                else:
-                    frontend.send(message)
+                if socks.get(backend) == zmq.POLLIN:
+                    message = backend.recv()
+                    more = backend.getsockopt(zmq.RCVMORE)
+                    if more:
+                        frontend.send(message, zmq.SNDMORE)
+                    else:
+                        frontend.send(message)
+
+        except Exception,e:
+            logging.exception(e)
+            self._shutdown()
 
     def _main_loop(self):
-        e = self.events.wait('shutdown')
+        self.events.subscribe('shutdown',self._shutdown)
         try:
             servers = []
             spool = [
@@ -87,8 +96,8 @@ class DaemonChild(object):
                      ,log=None
             ))"""
             
-            router   = DistributedHTTPDOTRouter(servers=spool,iopool=20)
-            #router   = HTTPDOTRouter()
+            #router   = DistributedHTTPDOTRouter(servers=spool,iopool=20)
+            router   = HTTPDOTRouter()
             protocol = HTTPProtocol(router)
             servers.append(WSGIServer(
                      ('127.0.0.1',9002), 
@@ -97,35 +106,22 @@ class DaemonChild(object):
                      ,log=None
             ))
             rack = ServerRack(servers).serve_forever()
-            
-        except KeyboardInterrupt:
+        except Exception,e:
+            logging.exception(e)
             self._shutdown()
-        except FiredEvent:
-            self._shutdown()
-        except MemoryError:
-            logging.error('--------!!!!!!!MemoryError!!!!!!!--------')
-            self._shutdown()
-        finally:
-            e.cancel()
             
         
     def _worker_loop(self):
-        e = self.events.wait('shutdown')
+        self.events.subscribe('shutdown',self._shutdown)
         try:
             spool = [
                 'tcp://127.0.0.1:5560'
             ]
             dp = DistributedHTTPDOTRouter(servers=spool,iopool=200)
             dp.serve_forever()
-        except KeyboardInterrupt:
+        except Exception,e:
+            logging.exception(e)
             self._shutdown()
-        except FiredEvent:
-            self._shutdown()
-        except MemoryError:
-            logging.error('--------!!!!!!!MemoryError!!!!!!!--------')
-            self._shutdown()
-        finally:
-            e.cancel()
  
 
             
