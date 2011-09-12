@@ -1,3 +1,5 @@
+import sys
+
 import gevent
 from gevent import core
 from gevent.hub import getcurrent
@@ -32,7 +34,7 @@ class Event(object):
         self.unsubscribe()
  
     def run(self):
-        gevent.spawn(self.callback)
+        g = gevent.spawn(self.callback)
  
     def __del__(self):
         self.unsubscribe()
