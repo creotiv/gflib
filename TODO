@@ -1,6 +1,2 @@
 5) Add unit tests and integration tests. Check for memory leaks.
-7) Make Observer.callback() to run in initiated greenlet.
-8) BUG: On STOP runner don't wait while all children dies
 9) Use ZeroMQ distribution library for hiload task processing at background
-10) use socket.fromfd and recreate wcgihandler on worker so response 
-    will be returned from worker and not the main proccess
