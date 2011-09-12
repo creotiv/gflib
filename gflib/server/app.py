@@ -50,18 +50,9 @@ class BaseApplication(object):
 
     def _stop_child(self, sig=None, frame=None):
         """It's executed when server shutdown. Used for correct shutdown.
-        """        
-        atexit.register(self._exit_func_child)
+        """     
         e = Observer()
         e.fire('shutdown')
-                       
-    def _exit_func_child(self):
-        """Function called last in the shutdown queue of child process"""
-        pidfile = self.pidsdir+'/gfchild_'+str(os.getpid())+'.pid'
-        if os.path.exists(pidfile):
-            os.remove(pidfile)
-        logging.shutdown()
-        self.shutdown()  
         
     def _reload_config(self):
         o = Observer()
