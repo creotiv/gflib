@@ -67,15 +67,7 @@ def setupLogging(proc="daemon",debug=False,directory='logs/',count=10,
     error.setLevel(logging.ERROR)
     error.setFormatter(formatter)
     
-    # buffer debug messages so they can be sent with error emails
-    error_cache = logging.handlers.MemoryHandler(max_size, logging.ERROR, error)
-    error_cache.setLevel(logging.ERROR)    
-
-    # add the handlers to the logger
-    if debug:
-        logger.addHandler(error)
-    else:
-        logger.addHandler(error_cache)
+    logger.addHandler(error)
     
     logging.log         = logging_debug
     logging.debug       = logging_debug
