@@ -27,14 +27,14 @@ class Daemon(object):
         self.chdir       = options.get('chdir',None)
         self.processes   = options.get('proc_num',None) or 1
         self.pidsdir     = options.get('pidsdir',None).rstrip('/ ') or 'pids'
-        self.debug       = options.get('chdir',None)
+        self.debug       = options.get('debug',None)
         self.logs_dir    = options.get('logdir',None)
         self.logs_count  = options.get('logfiles',None)
         self.logs_size   = options.get('logsize',None)
         self.children    = []
         self.stop_signal = False
         self.pid         = 0
-        self._init_logging()
+        
        
     def _daemonize(self):
         """
@@ -53,10 +53,19 @@ class Daemon(object):
         if self.chdir:        
             os.chdir(self.chdir)
 
-        for i in range(3):
+        """sys.stdout.flush()
+        sys.stderr.flush()
+        si = file('/dev/null', 'r')
+        so = file('logs/console.log', 'a+')
+        se = file('logs/console.log', 'a+', 0)
+        os.dup2(si.fileno(), sys.stdin.fileno())
+        os.dup2(so.fileno(), sys.stdout.fileno())
+        os.dup2(se.fileno(), sys.stderr.fileno())
+        """
+        for i in xrange(3):
             # Closing parent standart in,out,error fd's
             os.close(i)
-        
+            
         os.open(REDIRECT_TO, os.O_RDWR)
         os.dup2(0, 1)
         os.dup2(0, 2)
@@ -98,9 +107,8 @@ class Daemon(object):
         logging.debug("Starting server at %s " %
                     time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime()))
         for i in xrange(self.processes):
-            forked = gevent.fork()
+            forked = os.fork()
             if forked == 0:
-                #logging.shutdown()
                 setupLogging(i,debug=self.debug,directory=self.logs_dir,
                                 count=self.logs_count,max_size=self.logs_size)
                 self.runChild(i)
@@ -142,13 +150,15 @@ class Daemon(object):
      
     def start(self):
         # Check for a pidfile to see if the daemon already runs
+        
         if os.path.exists(self.pidsdir+'/gfdaemon.pid'):
             message = "pidfile %s already exist. Daemon already \
     running?\n"
             print message % (self.pidsdir+'/gfdaemon.pid')
             sys.exit(0)
-       
+        
         self._daemonize()
+        self._init_logging()
         self._init_signals()
         self.init_daemon()
         self._run_children()
@@ -203,18 +213,10 @@ class Daemon(object):
             for p in self.children:
                 try:
                     os.kill(p,signal.SIGTERM)
-                    time.sleep(0.1)
+                    if os.path.exists(self.pidsdir+'/gfchild_'+str(p)+'.pid'):
+                        os.remove(self.pidsdir+'/gfchild_'+str(p)+'.pid')
                 except OSError, err:	
                     pass                    
-            # Wait for children proccesses to end
-            while True:
-                exited = 0  
-                for i in self.children:
-                    if not os.path.exists(self.pidsdir+'gfchild_'+str(i)+'.pid'):    
-                        exited += 1
-                if exited == len(self.children):
-                    break
-                time.sleep(0.3)
                     
             logging.debug("Server stopped at %s " %
                 time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime()))
@@ -322,7 +324,6 @@ class Server(Daemon):
 
     def init_daemon(self):
         set_proc_name('%sd' % self._app.name.lower())
-        super(Server,self).init_daemon()
 
     def runChild(self, pnum):
         """This method runs after daemon has daemonized process as a child"""
