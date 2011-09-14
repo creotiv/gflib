@@ -121,9 +121,9 @@ Licensed under the Open Software License version 2.1.
 
 """
 
-__version__ = '1.0'
-__revision__ = "$Rev: 7680 $"
-__date__ = "$Date: 2008-11-29 07:55:36 -0700 (Sat, 29 Nov 2008) $"
+__version__ = '1.01'
+__revision__ = "$Rev: 7681 $"
+__date__ = "$Date: 2011-09-14 17:28:00 +0200 $"
 
 
 from threading import Condition
@@ -276,6 +276,10 @@ class PooledDB(object):
 					# shared cache is not full, get a dedicated connection
 					try: # first try to get it from the idle cache
 						con = self._idle_cache.pop(0)
+						c = con.cursor()
+						c.execute("SELECT 1")
+						c.fetchone()
+						c.close()
 					except IndexError: # else get a fresh connection
 						con = self.steady_connection()
 					con = SharedDBConnection(con)
@@ -299,7 +303,11 @@ class PooledDB(object):
 				# connection limit not reached, get a dedicated connection
 				try: # first try to get it from the idle cache
 					con = self._idle_cache.pop(0)
-				except IndexError: # else get a fresh connection
+					c = con.cursor()
+					c.execute("SELECT 1")
+					c.fetchone()
+					c.close()
+				except Exception: # else get a fresh connection
 					con = self.steady_connection()
 				con = PooledDedicatedDBConnection(self, con)
 				self._connections += 1
