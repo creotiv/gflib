@@ -35,29 +35,4 @@ class Config(dict):
 
         return data
 
-    def set(self,name,value):
-        """Multilevel set function"""
-        levels = name.split('.')
-        arr = self        
-        for name in levels[:-1]:
-            if not arr.has_key(name):         
-                arr[name] = {}   
-            arr = arr[name]
-        arr[levels[-1]] = value
 
-
-class InitConfig(object):
-
-    def __new__(cls, path=''):
-        try:
-            stream = file(path, 'r')
-            data = yaml.load(stream)
-            stream.close()
-        except yaml.YAMLError, exc:
-            if hasattr(exc, 'problem_mark'):
-                mark = exc.problem_mark
-                print "Error position: (%s:%s)" % (mark.line+1, mark.column+1)
-                sys.exit()
-
-        conf = Config(data)
-        return conf
