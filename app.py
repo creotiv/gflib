@@ -14,12 +14,12 @@ class Application(BaseApplication):
     """Application class. Used for defining application as a module block which
     passed to the server for executing."""
  
-    def run(self, pnum):
+    def run(self, pnum, *args, **kwargs):
         """Executed on each process init"""
         try:
             # Main daemon child processes initializing here. 
             # Pnum is process number in stack
-            d = DaemonChild(pnum)
+            d = DaemonChild(pnum, kwargs.get('sockets',None))
             d.run()
         except Exception,e:
             logging.exception('Error in main loop: %s' % e)

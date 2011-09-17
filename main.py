@@ -15,10 +15,11 @@ from gevent_zeromq import zmq
     
 class DaemonChild(object):
     """Main runner. Initialize all modules and start process loop"""
-    def __init__(self,pnum):
-        self.proc_num = pnum
-        self.events = Observer()
-        self.conf = Config.getInstance()
+    def __init__(self,pnum,sockets=None):
+        self.proc_num   = pnum
+        self.sockets    = sockets
+        self.events     = Observer()
+        self.conf       = Config.getInstance()
         
     def run(self):
         logging.debug(self.proc_num)
@@ -100,9 +101,9 @@ class DaemonChild(object):
             router   = HTTPDOTRouter()
             protocol = HTTPProtocol(router)
             servers.append(WSGIServer(
-                     ('127.0.0.1',9002), 
+                     self.sockets[0][1],
+                     #('127.0.0.1',9002), 
                      protocol
-                     ,backlog=4096
                      ,log=None
             ))
             rack = ServerRack(servers).serve_forever()

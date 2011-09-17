@@ -6,6 +6,7 @@ import signal
 import logging
 import socket
 import gevent
+import _socket
 from gevent.event import Event
 
 # internal ########################### 
@@ -31,6 +32,8 @@ class Daemon(object):
         self.logs_dir    = options.get('logdir',None)
         self.logs_count  = options.get('logfiles',None)
         self.logs_size   = options.get('logsize',None)
+        self.backlog     = options.get('backlog',None)
+        self.sockets     = options.get('sockets','')
         self.children    = []
         self.stop_signal = False
         self.pid         = 0
@@ -104,6 +107,7 @@ class Daemon(object):
         pass
 
     def _run_children(self):
+        self.sockets = [(t,create_socket(t.split(':')),self.backlog) for t in self.sockets.split(',')]
         logging.debug("Starting server at %s " %
                     time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime()))
         for i in xrange(self.processes):
@@ -111,7 +115,7 @@ class Daemon(object):
             if forked == 0:
                 setupLogging(i,debug=self.debug,directory=self.logs_dir,
                                 count=self.logs_count,max_size=self.logs_size)
-                self.runChild(i)
+                self.runChild(i,sockets=self.sockets)
                 return
             else:
                 file(self.pidsdir+'/gfchild_'+str(forked)+'.pid','w+').write("%s\n" % forked)
@@ -138,10 +142,9 @@ class Daemon(object):
             forked = gevent.fork()
             
             if forked == 0:
-                #logging.shutdown()
                 setupLogging(index,debug=self.debug,directory=self.logs_dir,
                                 count=self.logs_count,max_size=self.logs_size)
-                self.runChild(index)
+                self.runChild(index,sockets=self.sockets)
                 return
             else:
                 file(self.pidsdir+'/gfchild_'+str(forked)+'.pid','w+').write("%s\n" % forked)
@@ -273,9 +276,9 @@ class Daemon(object):
             os.chdir(self.chdir)
         self._init_signals()
         self.init_daemon()
-        self.runChild(0)
+        self.runChild(0,sockets=self.sockets)
                               
-    def runChild(self,pnum):
+    def runChild(self,pnum,*args,**kwargs):
         """
         You should override this method when you subclass Daemon. It
         will be called after the process has been daemonized by start()
@@ -325,7 +328,7 @@ class Server(Daemon):
     def init_daemon(self):
         set_proc_name('%sd' % self._app.name.lower())
 
-    def runChild(self, pnum):
+    def runChild(self,pnum,*args,**kwargs):
         """This method runs after daemon has daemonized process as a child"""
         gevent.signal(signal.SIGTERM, self._app._stop_child) 
         gevent.signal(signal.SIGINT, self._app._stop_child)  
@@ -333,5 +336,27 @@ class Server(Daemon):
         gevent.signal(signal.SIGHUP, self._app._reload_child_config)   
         
         set_proc_name('%s-ch' % self._app.name.lower())
-        self._app._run_child(pnum)
+        self._app._run_child(pnum,*args,**kwargs)
 
+def create_socket(s, backlog=256, reuse_addr=None):
+    if s[0] == 'tcp':
+        family  = _socket.AF_INET
+        type    = _socket.SOCK_STREAM
+        proto   = _socket.getprotobyname('tcp')
+    elif s[0] == 'unix':
+        family  = _socket.AF_UNIX
+        type    = _socket.SOCK_STREAM
+        proto   = _socket.getprotobyname('unix')
+    elif s[0] == 'udp':
+        family  = _socket.AF_INET
+        type    = _socket.SOCK_DGRAM
+        proto   = _socket.getprotobyname('udp')
+    
+    sock = _socket.socket(family=family,type=type,proto=proto)
+    if reuse_addr is not None:
+        sock.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEADDR, reuse_addr)
+    sock.bind((s[1],int(s[2])))
+    sock.listen(backlog)
+    sock.setblocking(0)
+    return sock
+    

@@ -28,6 +28,14 @@ parser.add_option("--dir", action="store", dest="dir",
 parser.add_option("-d","--debug", action="store_true", dest="debug",
     help="Set size of a log file", default=False)
 
+group = OptionGroup(parser, "Sockets Options")
+
+group.add_option("-s","--sockets", action="store", dest="sockets",
+    metavar="tcp:localhost:8080,unix:localhost:8081,udp:localhost:8081",
+    help="Shared sockets to listen", type="string", default="")
+group.add_option("--backlog", action="store", dest="backlog",
+    help="Sockets backlog", type="int", default=4096)
+
 group = OptionGroup(parser, "Logging Options")
     
 group.add_option("--logdir", action="store", dest="logdir",
