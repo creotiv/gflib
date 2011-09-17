@@ -25,13 +25,12 @@ class BaseApplication(object):
         
         self.name    = self.options.get('name',None) or "GFDaemon"
         self.pidsdir = self.options.get('pidsdir', 'pids').rstrip('/ ')
-        self.conf    = Config({'options':dict(self.options)})
         chdir        = self.options.get('chdir', '').rstrip('/ ')
         if chdir:
-            self.conf.set('pathes.root',chdir)
+            path     = {'root':chdir}
         else:
-            self.conf.set('pathes.root',os.path.dirname(os.path.abspath(sys.argv[0])))
-            self.conf.set('pathes.base',os.path.dirname(os.path.abspath(sys.argv[0])))  
+            path     = {'root':os.path.dirname(os.path.abspath(sys.argv[0]))}
+        self.conf    = Config({'options':dict(self.options),'path':path}) 
         self._startup()
         
     def _startup(self):
@@ -59,14 +58,14 @@ class BaseApplication(object):
         o.fire('reload_config')
         
     def _reload_child_config(self, sig=None, frame=None): 
-        """It's executed when server get SIGUSR1 signal. Used for configuration 
+        """It's executed when server get SIGUSR2 or SIGHUP signal. Used for configuration 
            reload without daemon restart.
         """      
         self._reload_config()
         self.reload_config()
         
     def _reload_daemon_config(self, sig=None, frame=None): 
-        """It's executed when server get SIGUSR1 signal. Used for configuration 
+        """It's executed when server get SIGUSR2 or SIGHUP signal. Used for configuration 
            reload without daemon restart.
         """      
         self._reload_config()
