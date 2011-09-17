@@ -1,2 +1,5 @@
-5) Add unit tests and integration tests. Check for memory leaks.
-9) Use ZeroMQ distribution library for hiload task processing at background
+- Add unit tests and integration tests. Check for memory leaks.
+- Use ZeroMQ distribution library for hiload task processing at background
+- Add option to use one global sockets shared between all process
+- Use memcachep for MemcachePool
+
