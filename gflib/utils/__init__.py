@@ -114,3 +114,18 @@ def dump_garbage():
             pass
 
         logging.debug('')
+        
+
+def yaml_to_dict(path=''):
+    try:
+        stream = file(path, 'r')
+        data = yaml.load(stream)
+        stream.close()
+    except yaml.YAMLError, exc:
+        if hasattr(exc, 'problem_mark'):
+            mark = exc.problem_mark
+            logging.error("Config error at position: (%s:%s)" % 
+                                                (mark.line+1, mark.column+1)
+            )
+
+    return data
