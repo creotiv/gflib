@@ -30,12 +30,13 @@ class Application(BaseApplication):
         server startup. Used for initialize application data.
         """
         logging.debug('startup')
-        self.conf_path = self.conf.get('pathes.root')+'/conf/config.yaml'
+        self.conf_path = self.conf.get('path.root')+'/conf/config.yaml'
         self.reload_config()
     
     def reload_config(self):
         """This methon should be rewrited in subclass. It's executed when server 
-           get SIGUSR1 signal. Used for configuration reload without daemon restart.
+           get SIGUSR2 or SIGHUP signal. Used for configuration reload without
+           daemon restart.
         """             
         logging.debug('reload child')
         try:
