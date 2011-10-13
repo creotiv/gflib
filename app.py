@@ -1,7 +1,5 @@
 from gflib.server.app import BaseApplication
-from gflib.logging.logger import setupLogging
 from gflib.utils.config import Config
-from gflib.utils.observer import Observer
 
 from main import DaemonChild
 
@@ -51,9 +49,8 @@ class Application(BaseApplication):
                 )
         else:
             logging.debug('Configuration reloaded #%s' % os.getpid())
-        if not data:
-            data = {}
-        self.conf.reinit(data)
+        if data:
+            self.conf.reinit(data)
             
     
     def shutdown(self):

@@ -6,7 +6,7 @@ from gflib.utils.config import Config
 from gflib.network.protocols import (AMFProtocol,AMFDOTRouter,HTTPProtocol,
                                      HTTPDOTRouter,DistributedHTTPDOTRouter)
 from gflib.network.distribution import Network
-from gflib.network.rack import ServerRack
+from gflib.server.rack import ServerRack
 
 import time
 import os,sys

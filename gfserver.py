@@ -3,8 +3,6 @@ from gevent import monkey;monkey.patch_all()
 from optparse import OptionParser,OptionGroup
 from gflib.server.daemon import Server
 import sys
-import yaml
-
 
 parser = OptionParser()
 
@@ -78,18 +76,6 @@ if options.app:
         
     elif cmd == "reload":
         print "Reloading the Daemon configuration..."
-        conf = options.config
-        if not conf:
-            conf = 'config.yaml'
-        try:
-            stream = file(conf, 'r')
-            data = yaml.load(stream)
-            stream.close()
-        except yaml.YAMLError, exc:
-            if hasattr(exc, 'problem_mark'):
-                mark = exc.problem_mark
-                print "Config error at position: (%s:%s)" % (mark.line+1, mark.column+1)
-            sys.exit(0)
         DAEMON.reload_config()
 
     elif cmd == "debug":

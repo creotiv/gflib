@@ -6,12 +6,12 @@ import signal
 import logging
 import socket
 import gevent
-import _socket
 from gevent.event import Event
 
 # internal ########################### 
 from gflib.utils import set_proc_name, get_somaxconn
 from gflib.logging.logger import setupLogging
+from gflib.network.socket import create_socket
 ###################################### 
 
 if (hasattr(os, "devnull")):
@@ -107,7 +107,7 @@ class Daemon(object):
         pass
 
     def _run_children(self):
-        self.sockets = [(t,create_socket(t.split(':')),self.backlog) for t in self.sockets.split(',')]
+        self.sockets = [(t,create_socket(t.split(':'),self.backlog),self.backlog) for t in self.sockets.split(',')]
         logging.debug("Starting server at %s " %
                     time.strftime("%a, %d %b %Y %H:%M:%S +0000", time.gmtime()))
         for i in xrange(self.processes):
@@ -338,25 +338,5 @@ class Server(Daemon):
         set_proc_name('%s-ch' % self._app.name.lower())
         self._app._run_child(pnum,*args,**kwargs)
 
-def create_socket(s, backlog=256, reuse_addr=None):
-    if s[0] == 'tcp':
-        family  = _socket.AF_INET
-        type    = _socket.SOCK_STREAM
-        proto   = _socket.getprotobyname('tcp')
-    elif s[0] == 'unix':
-        family  = _socket.AF_UNIX
-        type    = _socket.SOCK_STREAM
-        proto   = _socket.getprotobyname('unix')
-    elif s[0] == 'udp':
-        family  = _socket.AF_INET
-        type    = _socket.SOCK_DGRAM
-        proto   = _socket.getprotobyname('udp')
-    
-    sock = _socket.socket(family=family,type=type,proto=proto)
-    if reuse_addr is not None:
-        sock.setsockopt(_socket.SOL_SOCKET, _socket.SO_REUSEADDR, reuse_addr)
-    sock.bind((s[1],int(s[2])))
-    sock.listen(backlog)
-    sock.setblocking(0)
-    return sock
+
     
